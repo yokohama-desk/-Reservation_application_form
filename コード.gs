@@ -2,7 +2,7 @@
  * spreadsheetから新たなFormを指定フォルダに作成する
  * セクション付き PageBreakItem=区切りマーク
  * Formのアイテムの作成は何もしなければ手動で作成したのと同じ感覚で区切りを入れたら区切り後のセクションに次に作成したItemは作られる
- *
+ * カウンタダウンはForm側のスクリプトで実行する。
  */
 function createResevationForm() {  
   //フォーム作成
@@ -15,11 +15,14 @@ function createResevationForm() {
  
   var formTitle = topValues[0][1]; //タイトル
   var formDescription = topValues[1][1]; //概要
-  var pageDescription = topValues[2][1];///セクションの説明
-  
+  var pageDescription = topValues[2][1];//セクションの説明
+  var cnt = topValues[3][1];//時間ごとの予約数　時間ごとに予約数が違う場合は作成後先にダミー送信して調整のこと
+  var cntkey = {start:'（残 ',last:'）'};//この後に続く数字の後は「）」全角括弧閉じのるのみとする。
+  var FOLDER_ID=topValues[3][1];//フォルダiD
+    
   var form = FormApp.create(formTitle);
   
-  var FOLDER_ID = PropertiesService.getScriptProperties().getProperty('FOLDER_ID');
+  //var FOLDER_ID = PropertiesService.getScriptProperties().getProperty('FOLDER_ID');
   var formFile = DriveApp.getFileById(form.getId());
   DriveApp.getFolderById(FOLDER_ID).addFile(formFile);
   DriveApp.getRootFolder().removeFile(formFile);
@@ -44,7 +47,7 @@ function createResevationForm() {
     var page=form.addPageBreakItem().setTitle(section1Lists[i]).setHelpText(pageDescription);
     var item = form.addListItem()
     .setTitle(section1Lists[i]) 
-    .setChoiceValues(generateArray(initialValues,i));
+    .setChoiceValues(generateArray(initialValues,i,cnt,cntkey));
     pages.push(page);
     
   } 
@@ -72,12 +75,12 @@ function createResevationForm() {
  * @param {number} 配列の列数（0以上のインデックス）
  * @return {Object[]} 指定の列（見出しを除く）のデータによる一次元配列
  */
-function generateArray(values, column){
+function generateArray(values, column,cnt,cntkey){
   var i = 1;
   var array = [];
   for(var i = 1; i < values.length; i++){
     if(values[i][column]){
-      array.push(values[i][column]);
+      array.push(values[i][column] + cntkey.start + cnt + cntkey.last);
     }
   }
   return array;
