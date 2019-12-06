@@ -18,7 +18,7 @@ function createResevationForm() {
   var pageDescription = topValues[2][1];//セクションの説明
   var cnt = topValues[3][1];//時間ごとの予約数　時間ごとに予約数が違う場合は作成後先にダミー送信して調整のこと
   var cntkey = {start:'（残 ',last:'）'};//この後に続く数字の後は「）」全角括弧閉じのるのみとする。
-  var FOLDER_ID=topValues[3][1];//フォルダiD
+  var FOLDER_ID=topValues[4][1];//フォルダiD
     
   var form = FormApp.create(formTitle);
   
