@@ -11,11 +11,9 @@ function createResevationForm() {
  
   var initialSheet = spreadsheet.getSheetByName('初期値');
   var initialValues = initialSheet.getDataRange().getValues();
-  
-  //var section1Lists = initialValues.splice(0, 1)[0];
   var array=initialValues.splice(0, 1)[0];
   var section1Lists=array.map(function(value){
-    return Moment.moment(value).format("MM月D日");
+    return fnDatetoString(value,"MM月D日");
   }); 
   var listValues=[];
   var array=[];
@@ -23,12 +21,7 @@ function createResevationForm() {
   for(var i=0;i < initialValues.length;i++){
     var rowValue=initialValues[i];
     var array=rowValue.map(function(value){
-      if ( Object.prototype.toString.call(value) == "[object Date]"){
-        var ret = Moment.moment(value).format("HH:mm");
-      }else{
-        var ret = value;
-      }
-      return ret;
+      return fnDatetoString(value,"H:mm");
     }); 
     listValues.push(array);
   }
@@ -108,6 +101,22 @@ function generateArray(values, column,cnt,cntkey){
   }
   return array;
 }
+/**
+ * 値が日付かどうかを判断し日付の場合は文字列に変換して返す
+ *
+ * @param {value} 値
+ * @return {String} 文字列値
+ */
+function fnDatetoString(value,formatType){
+  if ( Object.prototype.toString.call(value) == "[object Date]"){
+    var ret = Moment.moment(value).format(formatType);
+  }else{
+    var ret = value;
+  }
+  return ret;
+
+}
+
 function onOpen(event){
   //https://www.tuyano.com/index3?id=1184003
   //メニュー配列 ツールにメニュー機能として追加する
