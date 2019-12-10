@@ -11,8 +11,28 @@ function createResevationForm() {
  
   var initialSheet = spreadsheet.getSheetByName('初期値');
   var initialValues = initialSheet.getDataRange().getValues();
-  var section1Lists = initialValues.splice(0, 1)[0];
- 
+  
+  //var section1Lists = initialValues.splice(0, 1)[0];
+  var array=initialValues.splice(0, 1)[0];
+  var section1Lists=array.map(function(value){
+    return Moment.moment(value).format("MM月D日");
+  }); 
+  var listValues=[];
+  var array=[];
+  var rowValue=[];
+  for(var i=0;i < initialValues.length;i++){
+    var rowValue=initialValues[i];
+    var array=rowValue.map(function(value){
+      if ( Object.prototype.toString.call(value) == "[object Date]"){
+        var ret = Moment.moment(value).format("HH:mm");
+      }else{
+        var ret = value;
+      }
+      return ret;
+    }); 
+    listValues.push(array);
+  }
+  
   var formTitle = topValues[0][1]; //タイトル
   var formDescription = topValues[1][1]; //概要
   var pageDescription = topValues[2][1];//セクションの説明
@@ -31,9 +51,12 @@ function createResevationForm() {
   form.setDescription(formDescription);
   form.addTextItem().setTitle('氏名').setRequired(true);
   var validationPhoneNum = FormApp.createTextValidation().requireWholeNumber().build();//全部数字
-  form.addTextItem().setTitle('電話番号(数字のみ)').setRequired(true).setValidation(validationPhoneNum);  
-  var validationEmail = FormApp.createTextValidation().requireTextIsEmail().build();
-  form.addTextItem().setTitle('メールアドレス').setRequired(true).setValidation(validationEmail);
+  form.addTextItem().setTitle('内線番号(数字のみ)').setRequired(true).setValidation(validationPhoneNum);
+  var pattern = "[a-zA-Z0-9]+";
+  var validationmemberID = FormApp.createTextValidation().requireTextMatchesPattern(pattern).build();//英数字
+  form.addTextItem().setTitle('社員番号').setRequired(true).setValidation(validationmemberID);  
+  //var validationEmail = FormApp.createTextValidation().requireTextIsEmail().build();
+  //form.addTextItem().setTitle('メールアドレス').setRequired(true).setValidation(validationEmail);
   var bestdayList = form.addListItem().setTitle('希望日').setRequired(true); 
 
   //希望日のリスト群は飛び先作成の後に作る  
@@ -47,7 +70,7 @@ function createResevationForm() {
     var page=form.addPageBreakItem().setTitle(section1Lists[i]).setHelpText(pageDescription);
     var item = form.addListItem()
     .setTitle(section1Lists[i]) 
-    .setChoiceValues(generateArray(initialValues,i,cnt,cntkey));
+    .setChoiceValues(generateArray(listValues,i,cnt,cntkey));
     pages.push(page);
     
   } 
@@ -78,7 +101,7 @@ function createResevationForm() {
 function generateArray(values, column,cnt,cntkey){
   var i = 1;
   var array = [];
-  for(var i = 1; i < values.length; i++){
+  for(var i = 0; i < values.length; i++){
     if(values[i][column]){
       array.push(values[i][column] + cntkey.start + cnt + cntkey.last);
     }
