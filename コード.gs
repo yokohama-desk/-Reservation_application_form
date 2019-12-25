@@ -30,8 +30,11 @@ function createResevationForm() {
   var formDescription = topValues[1][1]; //概要
   var pageDescription = topValues[2][1];//セクションの説明
   var cnt = topValues[3][1];//時間ごとの予約数　時間ごとに予約数が違う場合は作成後先にダミー送信して調整のこと
+  var maxnum = {start:'［全 ',last:'］'}; //全角括弧開始、全の後半角空白 + 数値n+全角括弧閉じ
   var cntkey = {start:'（残 ',last:'）'};//この後に続く数字の後は「）」全角括弧閉じのるのみとする。
-  var FOLDER_ID=topValues[4][1];//フォルダiD
+  var FOLDER_URL=topValues[4][1];//フォルダurl
+  var temp=FOLDER_URL.split("/");
+  var FOLDER_ID= temp[temp.length -1];
     
   var form = FormApp.create(formTitle);
   
@@ -63,7 +66,7 @@ function createResevationForm() {
     var page=form.addPageBreakItem().setTitle(section1Lists[i]).setHelpText(pageDescription);
     var item = form.addListItem()
     .setTitle(section1Lists[i]) 
-    .setChoiceValues(generateArray(listValues,i,cnt,cntkey));
+    .setChoiceValues(generateArray(listValues,i,cnt,maxnum,cntkey));
     pages.push(page);
     
   } 
@@ -87,16 +90,19 @@ function createResevationForm() {
 /**
  * シート全体の値を取得した二次元配列から、指定の列のデータ（見出し行を除く）を抜き出し一次元配列を構成する
  *
- * @param {Object[][]} シートのデータを二次元配列化した配列
- * @param {number} 配列の列数（0以上のインデックス）
+ * @param {Object[][]} values シートのデータを二次元配列化した配列
+ * @param {Number} column 配列の列数（0以上のインデックス）
+ * @param {Number} cnt 全数=残数
+ * @param {Number} maxnum 全数 区切り文字列
+ * @param {Number} cntkey 残数　区切り文字列
  * @return {Object[]} 指定の列（見出しを除く）のデータによる一次元配列
  */
-function generateArray(values, column,cnt,cntkey){
+function generateArray(values, column,cnt,maxnum,cntkey){
   var i = 1;
   var array = [];
   for(var i = 0; i < values.length; i++){
     if(values[i][column]){
-      array.push(values[i][column] + cntkey.start + cnt + cntkey.last);
+      array.push(values[i][column] + maxnum.start + cnt + maxnum.last + cntkey.start + cnt + cntkey.last);
     }
   }
   return array;
